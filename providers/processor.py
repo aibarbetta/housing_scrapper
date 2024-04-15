@@ -27,7 +27,7 @@ def process_properties(provider_name, provider_data):
     with conn:
         for prop in provider.next_prop():
             cur = conn.cursor()
-            logging.info(f"Processing property {prop['internal_id']}")
+            logging.info(f"Processing property {prop['internal_id']} ({prop['title']})")
             cur.execute(stmt, {'internal_id': prop['internal_id'], 'provider': prop['provider']})
             result = cur.fetchone()
             cur.close()

@@ -17,18 +17,28 @@ class Zonaprop(BaseProvider):
                 break
             
             page_content = BeautifulSoup(page_response.content, 'lxml')
-            properties = page_content.find_all('div', class_='postingCard')
+            properties = page_content.find_all('div', attrs={"data-qa": "posting PROPERTY"})
 
             for prop in properties:
                 # if data-id was already processed we exit
                 if prop['data-id'] in processed_ids:
                     return
                 processed_ids.append(prop['data-id'])
-                title = prop.find('a', class_='go-to-posting').get_text().strip()
-                price_section = prop.find('span', class_='firstPrice')
+                
+                # Find title
+                title = ""
+                title_section = prop.find('div', class_='postingAddress')
+                if title_section is not None:
+                    title = title_section.get_text().strip()
+                else:
+                    title = prop.find('h2', attrs={"data-qa": "POSTING_CARD_LOCATION"}).get_text().strip()
+                
+                # Find price
+                price_section = prop.find('div', attrs={"data-qa": "POSTING_CARD_PRICE"})
                 if price_section is not None:
-                    title = title + ' ' + price_section['data-price']
-                    
+                    price = price_section.get_text().strip()
+                    title = title + ' ' + price
+
                 yield {
                     'title': title, 
                     'url': self.provider_data['base_url'] + prop['data-to-posting'],
